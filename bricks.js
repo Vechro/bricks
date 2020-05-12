@@ -1,4 +1,5 @@
 const canvasSketch = require('canvas-sketch');
+const rough = require('roughjs/bundled/rough.cjs');
 
 const settings = {dimensions: [800, 800]};
 
@@ -16,15 +17,16 @@ const randomColor = () => {
     return colors[randomInt(colors.length)];
 };
 
-const strokeColor = '#ABB2BF';
-const backgroundColor = '#282C34';
+const strokeColor = '#555';
+const backgroundColor = '#efefef';
 
 const sketch = () => ({ context, width, height }) => {
+    const roughCanvas = rough.canvas(context.canvas);
 
     // Padding on the left and rigth side of the image
-    const horizontalPadding = width / 30;
+    const horizontalPadding = width / 16;
     // Amount of blocks in each direction
-    const blockNumber = 18;
+    const blockNumber = 16;
     // Calculate how big a cell is
     const cellSize = (width - horizontalPadding * 2) / blockNumber;
     // Calculate the number of rows
@@ -38,6 +40,8 @@ const sketch = () => ({ context, width, height }) => {
 
     // How much randomness the blocks have
     const blockOffset = blockSize / 5;
+
+    const strokeSize = blockSize / 6;
 
     const randomPoint = (x, y) => {
         x += randomInt(-blockOffset, blockOffset);
@@ -59,17 +63,11 @@ const sketch = () => ({ context, width, height }) => {
         context.fill();
 
         // Border
-        context.strokeStyle = strokeColor;
-        context.beginPath();
-        context.lineTo(...randomPoint(x, y));
-        context.lineTo(...randomPoint(x + w, y));
-        context.lineTo(...randomPoint(x + w, y + h));
-        context.lineTo(...randomPoint(x, y + h));
-        context.closePath();
-        context.stroke();
+        roughCanvas.polygon(
+            [randomPoint(x, y), randomPoint(x + w, y), randomPoint(x + w, y + h), randomPoint(x, y + h)],
+            {stroke: strokeColor, strokeWidth: strokeSize, bowing: 6}
+        );
     };
-
-    const strokeSize = blockSize / 6;
 
     context.fillStyle = backgroundColor;
     context.fillRect(0, 0, width, height);
