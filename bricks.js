@@ -1,7 +1,7 @@
 const canvasSketch = require('canvas-sketch');
 const rough = require('roughjs/bundled/rough.cjs');
 
-const settings = {dimensions: [800, 800]};
+const settings = {dimensions: [1000, 1000]};
 
 // Return random integer, overloaded to also accept randomInt(max)
 const randomInt = (min, max) => {
@@ -17,6 +17,19 @@ const randomColor = () => {
     return colors[randomInt(colors.length)];
 };
 
+const drawSpots = (context, size) => {
+    context.save();
+    context.fillStyle = `rgba(0, 0, 0, 0.0${randomInt(1, 10)})`;
+
+    const nrOfSpots = size * size / 2;
+    for (let i = 0; i < nrOfSpots; i++) {
+        const x = Math.random() * size - size / 2;
+        const y = Math.random() * size - size / 2;
+        context.fillRect(x, y, Math.random() + 0.35, Math.random() + 0.35);
+    }
+    context.restore();
+};
+
 const strokeColor = '#555';
 const backgroundColor = '#efefef';
 
@@ -24,8 +37,8 @@ const sketch = () => ({ context, width, height }) => {
     const roughCanvas = rough.canvas(context.canvas);
 
     // Padding on the left and rigth side of the image
-    const horizontalPadding = width / 16;
-    // Amount of blocks in each direction
+    const horizontalPadding = width / 24;
+    // Amount of blocks in both directions
     const blockNumber = 16;
     // Calculate how big a cell is
     const cellSize = (width - horizontalPadding * 2) / blockNumber;
@@ -34,7 +47,7 @@ const sketch = () => ({ context, width, height }) => {
     // Calculate the top and bottom padding
     const verticalPadding = (height - cellSize * rowNumber) / 2;
 
-    const padding = cellSize / 4;
+    const padding = cellSize / 5;
 
     const blockSize = cellSize - 2 * padding;
 
@@ -69,6 +82,23 @@ const sketch = () => ({ context, width, height }) => {
         );
     };
 
+    const drawCircle = (x, y, r) => {
+
+        // Block
+        context.strokeStyle = 'transparent';
+        context.fillStyle = randomColor();
+        context.beginPath();
+        context.ellipse(...randomPoint(x + r, y + r), r, r, 0, 0, 2 * Math.PI);
+        context.closePath();
+        context.fill();
+
+        // Border
+        roughCanvas.circle(
+            ...randomPoint(x + r, y + r), r * 2,
+            {stroke: strokeColor, strokeWidth: strokeSize, bowing: 6}
+        );
+    };
+
     context.fillStyle = backgroundColor;
     context.fillRect(0, 0, width, height);
 
@@ -79,7 +109,8 @@ const sketch = () => ({ context, width, height }) => {
 
     for (let row = 0; row < rowNumber; row++) {
         for (let col = 0; col < blockNumber; col++) {
-            if (Math.random() < 0.2) {
+            // 2x2 rect
+            if (Math.random() < 0.25) {
                 const [i, j] = randomCell(rowNumber - 1, blockNumber - 1);
                 if (!cells[i][j] && !cells[i + 1][j] && !cells[i][j + 1] && !cells[i + 1][j + 1]) {
                     const y = i * cellSize + padding + verticalPadding;
@@ -88,7 +119,8 @@ const sketch = () => ({ context, width, height }) => {
                     [cells[i][j], cells[i + 1][j], cells[i][j + 1], cells[i + 1][j + 1]] = [true, true, true, true];
                 }
             }
-            if (Math.random() < 0.3) {
+            // 2x1 rect
+            if (Math.random() < 0.33) {
                 const [i, j] = randomCell(rowNumber, blockNumber - 1);
                 if (!cells[i][j] && !cells[i][j + 1]) {
                     const y = i * cellSize + padding + verticalPadding;
@@ -97,7 +129,8 @@ const sketch = () => ({ context, width, height }) => {
                     [cells[i][j], cells[i][j + 1]] = [true, true];
                 }
             }
-            if (Math.random() < 0.3) {
+            // 1x2 rect
+            if (Math.random() < 0.33) {
                 const [i, j] = randomCell(rowNumber - 1, blockNumber);
                 if (!cells[i][j] && !cells[i + 1][j]) {
                     const y = i * cellSize + padding + verticalPadding;
@@ -112,12 +145,22 @@ const sketch = () => ({ context, width, height }) => {
     for (let row = 0; row < rowNumber; row++) {
         for (let col = 0; col < blockNumber; col++) {
             if (!cells[row][col]) {
-                const y = row * cellSize + padding + verticalPadding;
-                const x = col * cellSize + padding + horizontalPadding;
-                drawBlock(x, y, blockSize, blockSize);
+                if (Math.random() < 0.5) {
+                    // 1x1 rect
+                    const y = row * cellSize + padding + verticalPadding;
+                    const x = col * cellSize + padding + horizontalPadding;
+                    drawBlock(x, y, blockSize, blockSize);
+                } else {
+                    // 1x1 circle
+                    const y = row * cellSize + padding + verticalPadding;
+                    const x = col * cellSize + padding + horizontalPadding;
+                    drawCircle(x, y, blockSize / 2);
+                }
             }
         }
     }
+
+    drawSpots(context, width + height);
 
 };
 
