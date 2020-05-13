@@ -13,13 +13,18 @@ const randomCell = (a, b) => [randomInt(a), randomInt(b)];
 
 // Todo: Add alpha value
 const randomColor = () => {
-    const colors = ['#E06C75', '#98C379', '#E5C07B', '#61AFEF'];
+    // [`hsl(355, ${65 + randomInt(-5, 6)}%, ${65 + randomInt(-5, 6)}%)`, `hsl(184, ${20 + randomInt(-5, 6)}%, ${54 + randomInt(-5, 6)}%)`, `hsl(69, ${28 + randomInt(-5, 6)}%, ${64 + randomInt(-5, 6)}%)`, `hsl(32, ${52 + randomInt(-5, 6)}%, ${74 + randomInt(-5, 6)}%)`];
+    const colors = [
+        'hsl(355, 65%, 65%)',
+        'hsl(184, 20%, 54%)',
+        'hsl(69, 28%, 64%)',
+        'hsl(32, 52%, 74%)'
+    ];
     return colors[randomInt(colors.length)];
 };
-
 const drawSpots = (context, size) => {
     context.save();
-    context.fillStyle = `rgba(0, 0, 0, 0.0${randomInt(1, 10)})`;
+    context.fillStyle = `rgba(0, 0, 0, 0.0${randomInt(1, 7)})`;
 
     const nrOfSpots = size * size / 2;
     for (let i = 0; i < nrOfSpots; i++) {
@@ -77,7 +82,12 @@ const sketch = () => ({ context, width, height }) => {
 
         // Border
         roughCanvas.polygon(
-            [randomPoint(x, y), randomPoint(x + w, y), randomPoint(x + w, y + h), randomPoint(x, y + h)],
+            [
+                randomPoint(x, y),
+                randomPoint(x + w, y),
+                randomPoint(x + w, y + h),
+                randomPoint(x, y + h)
+            ],
             {stroke: strokeColor, strokeWidth: strokeSize, bowing: 6}
         );
     };
@@ -116,7 +126,17 @@ const sketch = () => ({ context, width, height }) => {
                     const y = i * cellSize + padding + verticalPadding;
                     const x = j * cellSize + padding + horizontalPadding;
                     drawBlock(x, y, blockSize * 2 + 2 * padding, blockSize * 2 + 2 * padding);
-                    [cells[i][j], cells[i + 1][j], cells[i][j + 1], cells[i + 1][j + 1]] = [true, true, true, true];
+                    [
+                        cells[i][j],
+                        cells[i + 1][j],
+                        cells[i][j + 1],
+                        cells[i + 1][j + 1]
+                    ] = [
+                        true,
+                        true,
+                        true,
+                        true
+                    ];
                 }
             }
             // 2x1 rect
@@ -137,6 +157,26 @@ const sketch = () => ({ context, width, height }) => {
                     const x = j * cellSize + padding + horizontalPadding;
                     drawBlock(x, y, blockSize, blockSize * 2 + 2 * padding);
                     [cells[i][j], cells[i + 1][j]] = [true, true];
+                }
+            }
+            // 2x2 circle
+            if (Math.random() < 0.25) {
+                const [i, j] = randomCell(rowNumber - 1, blockNumber - 1);
+                if (!cells[i][j] && !cells[i + 1][j] && !cells[i][j + 1] && !cells[i + 1][j + 1]) {
+                    const y = i * cellSize + padding + verticalPadding;
+                    const x = j * cellSize + padding + horizontalPadding;
+                    drawCircle(x, y, blockSize + padding);
+                    [
+                        cells[i][j],
+                        cells[i + 1][j],
+                        cells[i][j + 1],
+                        cells[i + 1][j + 1]
+                    ] = [
+                        true,
+                        true,
+                        true,
+                        true
+                    ];
                 }
             }
         }
