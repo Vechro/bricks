@@ -39,6 +39,24 @@
         "space-infix-ops": "error",
         "github/array-foreach": "error",
         "promise/always-return": "off",
+        "array-bracket-newline": [
+            "error",
+            {
+                "minItems": 3,
+                "multiline": true
+            }
+        ],
+        "array-element-newline": [
+            "error",
+            {
+                "ArrayExpression": {
+                    "minItems": 3
+                },
+                "ArrayPattern": {
+                    "minItems": 3
+                }
+            }
+        ],
         "accessor-pairs": "off",
         "arrow-body-style": [
             "error",
